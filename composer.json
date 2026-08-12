@@ -1,0 +1,19 @@
+{
+    "name": "taqlyn/sdk-php",
+    "description": "Taqlyn server SDK for creating signed short links",
+    "type": "library",
+    "license": "MIT",
+    "require": {
+        "php": "^8.2",
+        "ext-json": "*",
+        "ext-sodium": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "Taqlyn\\": "src/"
+        }
+    },
+    "scripts": {
+        "test": "php tests/smoke.php"
+    }
+}
