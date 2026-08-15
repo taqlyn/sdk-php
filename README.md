@@ -1,5 +1,7 @@
 # taqlyn/sdk-php
 
+**Full guide:** [PHP](../../apps/docs/content/server/php.md) on the docs site.
+
 Taqlyn server SDK for PHP 8.2+. It creates short links with Ed25519-signed
 requests. This package is for server-side use only; it does not include mobile
 Match or resolve flows.
