@@ -1,0 +1,22 @@
+# Composer vendor directory
+/vendor/
+composer.phar
+
+# Tooling cache & coverage
+.phpunit.result.cache
+.php-cs-fixer.cache
+coverage/
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+
+# IDE / OS
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*~
+*.log
