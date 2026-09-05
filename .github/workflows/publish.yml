@@ -1,0 +1,58 @@
+name: Publish PHP SDK (Packagist)
+
+# PHP Composer packages on Packagist are synchronized directly from Git tags.
+# If PACKAGIST_TOKEN and PACKAGIST_USERNAME are configured, this workflow notifies
+# the Packagist API to immediately re-crawl the repository.
+
+on:
+  release:
+    types: [published]
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+concurrency:
+  group: publish-php-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    name: Verify & Sync with Packagist
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: json, sodium
+          coverage: none
+
+      - name: Validate composer.json
+        run: composer validate --strict
+
+      - name: Run tests
+        run: |
+          composer install --no-interaction --no-progress
+          composer test
+
+      - name: Notify Packagist API
+        env:
+          PACKAGIST_TOKEN: ${{ secrets.PACKAGIST_TOKEN }}
+          PACKAGIST_USERNAME: ${{ secrets.PACKAGIST_USERNAME }}
+        run: |
+          if [ -n "$PACKAGIST_TOKEN" ] && [ -n "$PACKAGIST_USERNAME" ]; then
+            echo "Notifying Packagist API of new release..."
+            curl -s -u "${PACKAGIST_USERNAME}:${PACKAGIST_TOKEN}" \
+              -H "Content-Type: application/json" \
+              -d '{"repository":{"url":"https://github.com/'"${{ github.repository }}"'"}}' \
+              https://packagist.org/api/update-package?username="${PACKAGIST_USERNAME}"
+          else
+            echo "Packagist will auto-sync via GitHub Webhook or periodic crawl."
+          fi
