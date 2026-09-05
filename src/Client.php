@@ -12,6 +12,9 @@ final class Client
 {
     private const CREATE_SHORT_LINK_PATH = '/v1/short-links';
 
+    public const DEFAULT_API_BASE_URL = 'https://api.taqlyn.com';
+
+    private readonly string $baseUrl;
     private readonly Signer $signer;
 
     /** @var Closure(string, string, array<string, string>, string): array{status: int, body: string} */
@@ -21,16 +24,22 @@ final class Client
     private readonly Closure $clock;
 
     /**
+     * @param ?string $baseUrl Control-plane base URL. Defaults to TAQLYN_BASE_URL or https://api.taqlyn.com.
      * @param null|callable(string, string, array<string, string>, string): array{status: int, body: string} $transport
      * @param null|callable(): int $clock
      */
     public function __construct(
-        private readonly string $baseUrl,
-        string $clientId,
-        string $privateKeyPem,
+        ?string $baseUrl = null,
+        string $clientId = '',
+        string $privateKeyPem = '',
         ?callable $transport = null,
         ?callable $clock = null,
     ) {
+        $envBaseUrl = getenv('TAQLYN_BASE_URL') ?: getenv('TAQLYN_API_URL');
+        $rawUrl = ($baseUrl !== null && trim($baseUrl) !== '')
+            ? $baseUrl
+            : ($envBaseUrl !== false && trim((string) $envBaseUrl) !== '' ? $envBaseUrl : self::DEFAULT_API_BASE_URL);
+        $this->baseUrl = rtrim($rawUrl, '/');
         $this->signer = new Signer($clientId, $privateKeyPem);
         $this->transport = $transport === null
             ? $this->defaultTransport(...)
